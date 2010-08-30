@@ -40,7 +40,7 @@ function love.load()
 	math.randomseed(os.time())
 
 	-- Init graphics mode
-	screensize = { 800,600 }
+	screensize = { 800, 600 }
 	if not love.graphics.setMode( screensize[1], screensize[2], false, true, 0 ) then
 		quit()
 	end
