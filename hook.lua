@@ -97,7 +97,6 @@ end
 
 function Hook:throw()
 	if not self.thrown then
---~ 		self.pos = self.top
 		self.base_dir = Vector( math.random()*5-4, 5 ):normalize()
 		self.speed = 300 + math.random()*400
 		self.thrown = true
