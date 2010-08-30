@@ -97,10 +97,14 @@ end
 
 function Hook:throw()
 	if not self.thrown then
-		self.pos = self.top
+--~ 		self.pos = self.top
 		self.base_dir = Vector( math.random()*5-4, 5 ):normalize()
 		self.speed = 300 + math.random()*400
 		self.thrown = true
+
+		-- force start throw at the limit of the screen
+		self.pos[1] = self.top[1] - self.base_dir[1]/self.base_dir[2]*self.top[2]
+		self.pos[2] = 0
 	end
 end
 
