@@ -33,6 +33,7 @@ function love.load()
 
 	love.filesystem.require("fish.lua")
 	love.filesystem.require("hook.lua")
+	love.filesystem.require("weeds.lua")
 
 	-- Initialization
 	start_time = love.timer.getTime()
@@ -56,6 +57,8 @@ function love.load()
 
 	bgImage = love.graphics.newImage( "fishbg.png" )
 	fishSchool = School()
+	seaWeedsBack = Weeds()
+	seaWeedsFront = Weeds()
 
 	hook = Hook()
 	keyDown = false
@@ -63,11 +66,16 @@ function love.load()
 end
 
 function love.update(dt)
-	fishSchool:update( dt )
 
-	if keyDown then hook:throw() else hook:pull() end
+	if gameStatus==1 then
+		fishSchool:update( dt )
+		seaWeedsBack:update( dt )
+		seaWeedsFront:update( dt )
 
-	hook:update(dt)
+		if keyDown then hook:throw() else hook:pull() end
+
+		hook:update(dt)
+	end
 
 	if gameStatus==2 and endTimer>0 then
 		endTimer = endTimer - dt
@@ -102,8 +110,10 @@ function love.draw()
 		love.graphics.print(hook.fish_count, 30, 30)
 	end
 
+	seaWeedsBack:draw()
 	hook:draw()
 	fishSchool:draw()
+	seaWeedsFront:draw()
 
 end
 

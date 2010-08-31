@@ -67,7 +67,7 @@ function Hook:update(dt)
 		self.center_speed = self.pos:distance( { screensize[1]/2, screensize[2]/2 } ) * 100 / screensize[1]
 
 		-- "wind" (submarine currents)
-		self.wind_dir = self.wind_dir:rotate( 10*(math.random() - 0.5)*dt )
+		self.wind_dir = self.wind_dir:rotate( math.pi*(math.random() - 0.5)*dt )
 		self.wind_speed = self.wind_speed + dt * (math.random() * 100 - 50 )
 		if self.wind_speed<0 then self.wind_speed = 0 end
 		if self.wind_speed > self.wind_max_speed then self.wind_speed = self.wind_max_speed end
