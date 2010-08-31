@@ -96,7 +96,7 @@ function love.draw()
 
 	if gameStatus==0 then
 		love.graphics.print("Carassius auratus", 70, 125)
-		love.graphics.print("A fishing game", 70, 175)
+		love.graphics.print("A fishing simulation", 70, 175)
 		love.graphics.print("Press a key", 70, 225)
 		love.graphics.print("by Christiaan Janssen", 400, 550)
 		return

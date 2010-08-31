@@ -112,6 +112,7 @@ function Hook:pull()
 	if self.pos[2] < 0 then
 		self.thrown = false
 		self.attached = false
+		self.pos[2] = -screensize[2]
 		return
 	end
 	self.pull_dir = self.pos:diff( self.top )

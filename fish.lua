@@ -17,19 +17,37 @@
 --     along with Carassius auratus  If not, see <http://www.gnu.org/licenses/>.
 
 Fish = class(function(self)
-	self.img = love.graphics.newImage("redfish1.png")
-	self.img_cache = love.graphics.newImage("redfish2.png")
+	if math.random(3)>1 then
+		self.type = 1
+	else
+		self.type = 2
+	end
+
+	if self.type==1 then
+		self.img = love.graphics.newImage("redfish1.png")
+		self.img_cache = love.graphics.newImage("redfish2.png")
+		self.accel = 30
+		self.steering = 2
+		self.min_speed = 10
+		self.max_speed = 250
+		self.min_angular = -2
+		self.max_angular = 2
+	else
+		self.img = love.graphics.newImage("yellfish1.png")
+		self.img_cache = love.graphics.newImage("yellfish2.png")
+		self.accel = 50 -- pixels/ s**2
+		self.steering = 3 -- rad/s
+		self.min_speed = 20
+		self.max_speed = 300
+		self.min_angular = -3
+		self.max_angular = 3
+	end
 	self.img_timer = 0
 	self.pos = Vector( math.random(screensize[1]) , math.random(screensize[2]) )
 	self.dir = Vector( math.random(), math.random() ):normalize()
 	self.angular_dir = 0
-	self.accel = 50 -- pixels/ s**2
-	self.steering = 3 -- rad/s
-	self.min_speed = 20
-	self.max_speed = 300
 	self.speed = math.random( self.max_speed - self.min_speed ) + self.min_speed -- pixels/s
-	self.min_angular = -2
-	self.max_angular = 2
+
 end)
 
 function Fish:connect( school, hook )
@@ -133,10 +151,10 @@ function Fish:attract()
 	if not self.hook.thrown then return end
 	if self.hook.pos[2]<0 then return end
 	if self.hook:hasFish() then return end
-	if self.speed > 100 then return end
+	if self.speed > 150 then return end
 	if self.hook.dir:mag() > 100 then return end
-	if self.pos:distance( self.hook.pos ) > 80 then return end
-	if math.abs( self.dir:angle(self.pos:diff( self.hook.pos ) ) ) > 3.1416 / 4 then return end
+	if self.pos:distance( self.hook.pos ) > 100 then return end
+	if math.abs( self.dir:angle(self.pos:diff( self.hook.pos ) ) ) > math.pi / 4 then return end
 	self.hook.attracted = self
 end
 
