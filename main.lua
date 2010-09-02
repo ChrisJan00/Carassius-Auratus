@@ -34,6 +34,7 @@ function love.load()
 	love.filesystem.require("fish.lua")
 	love.filesystem.require("hook.lua")
 	love.filesystem.require("weeds.lua")
+	love.filesystem.require("bubbles.lua")
 
 	-- Initialization
 	start_time = love.timer.getTime()
@@ -59,6 +60,7 @@ function love.load()
 	fishSchool = School()
 	seaWeedsBack = Weeds()
 	seaWeedsFront = Weeds()
+	bubbles = Bubbles()
 
 	hook = Hook()
 	keyDown = false
@@ -71,6 +73,7 @@ function love.update(dt)
 		fishSchool:update( dt )
 		seaWeedsBack:update( dt )
 		seaWeedsFront:update( dt )
+		bubbles:update( dt )
 
 		if keyDown then hook:throw() else hook:pull() end
 
@@ -111,6 +114,7 @@ function love.draw()
 	end
 
 	seaWeedsBack:draw()
+	bubbles:draw()
 	hook:draw()
 	fishSchool:draw()
 	seaWeedsFront:draw()

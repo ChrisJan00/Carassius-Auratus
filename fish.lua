@@ -44,7 +44,7 @@ Fish = class(function(self)
 	end
 	self.img_timer = 0
 	self.pos = Vector( math.random(screensize[1]) , math.random(screensize[2]) )
-	self.dir = Vector( math.random(), math.random() ):normalize()
+	self.dir = Vector( math.random()-0.5, math.random()-0.5 ):normalize()
 	self.angular_dir = 0
 	self.speed = math.random( self.max_speed - self.min_speed ) + self.min_speed -- pixels/s
 
