@@ -47,12 +47,17 @@ Fish = class(function(self)
 	self.dir = Vector( math.random()-0.5, math.random()-0.5 ):normalize()
 	self.angular_dir = 0
 	self.speed = math.random( self.max_speed - self.min_speed ) + self.min_speed -- pixels/s
+	self.status = 1
+	-- status = 0 <-- exit screen
+	-- status = 1 <-- normal
+	-- status = 2 <-- enter screen
 
 end)
 
 function Fish:connect( school, hook )
 	self.school = school
 	self.hook = hook
+	self.school.fish_count[self.type] = self.school.fish_count[self.type]+1
 end
 
 function Fish:draw()
@@ -66,11 +71,11 @@ end
 function Fish:advance(dt)
 	self.pos = self.pos:add( self.dir:smul( self.speed * dt ) )
 
-	if self.pos[1] < 0 then
+	if self.pos[1] < 0 and self.status==1 then
 		self.pos[1] = self.pos[1] + screensize[1]
 	end
 
-	if self.pos[1] > screensize[1] then
+	if self.pos[1] > screensize[1] and self.status==1 then
 		self.pos[1] = self.pos[1] - screensize[1]
 	end
 
@@ -95,6 +100,14 @@ function randomSign()
 end
 
 function Fish:update( dt )
+	if self.status==0 and (self.pos[1]<-30 or self.pos[1]>screensize[1]+30) then
+		self:disappear()
+		return
+	end
+	if self.status==2 and self.pos[1]>0 and self.pos[1]<screensize[1] then
+		self.status=1
+	end
+
 	if self.img_timer <= 0 then
 		self.img_timer = 0.1 * self.max_speed / self.speed
 		local tmp = self.img
@@ -141,6 +154,7 @@ function Fish:update( dt )
 		self.pos = self.hook.pos
 		if self.pos[2] < 0 then
 			self.school.list:removeCurrent()
+			self:disappear()
 			self.hook.fish_count = self.hook.fish_count + 1
 		end
 	end
@@ -158,11 +172,17 @@ function Fish:attract()
 	self.hook.attracted = self
 end
 
+function Fish:disappear()
+	self.school.list:remove(self)
+	self.school.fish_count[self.type] = self.school.fish_count[self.type]-1
+end
+
 
 ---------------------------------------------------------------------------------------
 
 School = class(function(self)
 	self.list = List()
+	self.fish_count = {0,0}
 end)
 
 function School:generate( n )
@@ -180,6 +200,9 @@ function School:draw()
 end
 
 function School:update(dt)
+	-- update the population
+
+	-- update the fish
 	local fish = self.list:getFirst()
 	while fish do
 		fish:update(dt)

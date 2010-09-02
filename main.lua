@@ -111,6 +111,7 @@ function love.draw()
 
 	if gameStatus==1 then
 		love.graphics.print(hook.fish_count, 30, 30)
+--~ 		love.graphics.print(fishSchool.fish_count[1].." "..fishSchool.fish_count[2],30,30)
 	end
 
 	seaWeedsBack:draw()
