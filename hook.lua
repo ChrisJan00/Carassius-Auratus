@@ -120,7 +120,11 @@ end
 function Hook:pull()
 	if self.pos[2] < 0 then
 		self.thrown = false
-		self.attached = false
+		if self.hooked then
+			self.hooked:captured()
+		end
+		self.hooked = nil
+		self.attracted = nil
 		self.pos[2] = -screensize[2]
 		return
 	end
@@ -129,9 +133,9 @@ function Hook:pull()
 end
 
 function Hook:hasFish()
-	return self.attached
+	return self.hooked or self.attracted
 end
 
 function Hook:attach( fish )
-	self.attached = fish
+	self.hooked = fish
 end

@@ -134,8 +134,10 @@ function Fish:update( dt )
 
 	self:attract()
 
+	local isAttracted = (self.hook.attracted==self)
 
-	if self.hook.attracted == self then
+
+	if isAttracted then
 		self.speed = self.speed * 0.9 + self.hook.dir:mag() * 0.1
 	else
 		self.speed = self.speed - math.log(1-math.random()) * self.accel * dt * randomSign()
@@ -143,12 +145,8 @@ function Fish:update( dt )
 	if self.speed < self.min_speed then self.speed = self.min_speed end
 	if self.speed > self.max_speed then self.speed = self.max_speed end
 
-	if self.hook.attracted == self then
-		if self.hook.hooked == self then
-			self.angular_dir = self.angular_dir * 0.9 + 0.1 * self.dir:angleDiff( self.hook.hook_pos:diff(self.hook.pos))
-		else
-			self.angular_dir = self.angular_dir * 0.9 + 0.1 * self.dir:angleDiff( self.pos:diff(self.hook.pos) )
-		end
+	if isAttracted then
+		self.angular_dir = self.angular_dir * 0.9 + 0.1 * self.dir:angleDiff( self.pos:diff(self.hook.hook_pos) )
 	else
 		self.angular_dir = self.angular_dir * 0.9 * dt
 		self.angular_dir = self.angular_dir - math.log(1-math.random()) * self.steering * dt * randomSign()
@@ -158,7 +156,7 @@ function Fish:update( dt )
 	if self.angular_dir > self.max_angular then self.angular_dir = self.max_angular end
 	self.dir = self.dir:rotate( self.angular_dir )
 
-	if self.hook.attracted == self and (not self.hook.hooked) and self.pos:distance( self.hook.pos ) < 6 then
+	if isAttracted and (not self.hook.hooked) and self.pos:distance( self.hook.hook_pos ) < 6 then
 		self.hook.hooked = self
 	end
 
@@ -169,7 +167,7 @@ function Fish:update( dt )
 
 	self:advance( dt )
 
-	if self.hook.attracted==self and self.hook.dir:mag() > self.hook.loosing_speed then
+	if isAttracted and self.hook.dir:mag() > self.hook.loosing_speed then
 		self.hook.hooked = nil
 		self.hook.attracted = nil
 		self.dir = self.hook.pos:diff( self.pos )
@@ -179,12 +177,16 @@ function Fish:update( dt )
 		self.pos = self.hook.hook_pos
 		self.dir = self.hook.hook_pos:diff(self.hook.pos):normalize()
 		if self.pos[2] < 0 then
-			self.school.list:removeCurrent()
-			self:disappear()
-			self.hook.fish_count = self.hook.fish_count + 1
+			self:captured()
 		end
 	end
 
+end
+
+function Fish:captured()
+	self.school.list:remove(self)
+	self:disappear()
+	self.hook.fish_count = self.hook.fish_count + 1
 end
 
 function Fish:attract()
