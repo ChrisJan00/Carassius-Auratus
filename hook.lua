@@ -46,12 +46,16 @@ Hook = class(function(self)
 	self.loosing_speed = 100
 
 	self.gravity = 10
+	self.delay = 0
 
 	self.fish_count = 0
 
 end)
 
 function Hook:update(dt)
+	if self.delay > 0 then
+		self.delay = self.delay - dt
+	end
 
 	self.dir = Vector(0,0):add(
 		self.base_dir:smul(self.speed),
@@ -105,7 +109,7 @@ function Hook:draw()
 end
 
 function Hook:throw()
-	if not self.thrown then
+	if (not self.thrown) and self.delay <= 0 then
 		self.base_dir = Vector( math.random()*5-4, 5 ):normalize()
 		self.speed = 300 + math.random()*400
 		self.thrown = true
@@ -119,7 +123,10 @@ end
 
 function Hook:pull()
 	if self.pos[2] < 0 then
-		self.thrown = false
+		if self.thrown then
+			self.thrown = false
+			self.delay = 1.4
+		end
 		if self.hooked then
 			self.hooked:captured()
 		end

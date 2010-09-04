@@ -138,7 +138,7 @@ function Fish:update( dt )
 
 
 	if isAttracted then
-		self.speed = self.speed * 0.9 + self.hook.dir:mag() * 0.1
+		self.speed = self.speed * 0.9 + (self.hook.dir:mag()+self.min_speed) * 0.1
 	else
 		self.speed = self.speed - math.log(1-math.random()) * self.accel * dt * randomSign()
 	end
@@ -294,11 +294,3 @@ function School:updatePopulations( dt )
 	end
 end
 
-
---~ function School:connect(hook)
---~ 	local fish = self.list:getFirst()
---~ 	while fish do
---~ 		fish:connect(self, hook)
---~ 		fish = self.list:getNext()
---~ 	end
---~ end
