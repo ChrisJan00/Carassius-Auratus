@@ -177,7 +177,7 @@ function Fish:update( dt )
 
 	if self.hook.hooked == self then
 		self.pos = self.hook.hook_pos
---~ 		self.dir = self.hook.hook_pos:diff(self.hook.pos):normalize()
+		self.dir = self.hook.hook_pos:diff(self.hook.pos):normalize()
 		if self.pos[2] < 0 then
 			self.school.list:removeCurrent()
 			self:disappear()
