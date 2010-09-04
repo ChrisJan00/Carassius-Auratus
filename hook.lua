@@ -19,7 +19,11 @@
 Hook = class(function(self)
 	self.thrown = false
 	self.pos = Vector(0,0)
+	self.hook_pos = Vector(0,0)
 	self.top = Vector(screensize[1]*3/4, -screensize[2]/2)
+
+	self.picture = love.graphics.newImage("hook.png")
+	self.hook_len = self.picture:getHeight()
 
 	self.dir = Vector(0,0)
 	self.speed = 0
@@ -41,6 +45,8 @@ Hook = class(function(self)
 	self.hooked = nil
 	self.loosing_speed = 100
 
+	self.gravity = 10
+
 	self.fish_count = 0
 
 end)
@@ -54,6 +60,9 @@ function Hook:update(dt)
 		self.wind_dir:smul( self.wind_speed ) )
 
 	self:move(dt)
+
+	self.hook_pos = self.hook_pos:add(Vector(0,dt*self.gravity))
+	self.hook_pos = self.pos:diff(self.hook_pos):normalize():smul(self.hook_len):add(self.pos)
 
 	-- friction
 	if self.pos[2]>0 then
@@ -90,14 +99,13 @@ function Hook:draw()
 	love.graphics.setColor(0,0,0)
 	love.graphics.setLine(2)
 	love.graphics.line( self.pos[1], self.pos[2], self.top[1], self.top[2] )
-	love.graphics.circle( "line", self.pos[1], self.pos[2], 4 )
+	love.graphics.draw(self.picture, self.pos[1], self.pos[2], (self.pos:diff(self.hook_pos):angle()-math.pi/2) , 1, 1, self.picture:getWidth()/2, 0 )
 
 	love.graphics.setColor(255,255,255)
 end
 
 function Hook:throw()
 	if not self.thrown then
---~ 		self.pos = self.top
 		self.base_dir = Vector( math.random()*5-4, 5 ):normalize()
 		self.speed = 300 + math.random()*400
 		self.thrown = true
@@ -105,6 +113,7 @@ function Hook:throw()
 		-- force start throw at the limit of the screen
 		self.pos[1] = self.top[1] - self.base_dir[1]/self.base_dir[2]*self.top[2]
 		self.pos[2] = 0
+		self.hook_pos = self.pos:add(Vector(0,-self.hook_len))
 	end
 end
 

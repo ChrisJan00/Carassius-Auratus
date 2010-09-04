@@ -84,11 +84,6 @@ function Fish:draw()
 end
 
 function Fish:advance(dt)
-	if self.state==2 then
-		if self.pos[1]<0 and self.dir[1]<0 then self.dir[1]=-self.dir[1] end
-		if self.pos[1]>screensize[1] and self.dir[1]>0 then self.dir[1]=-self.dir[1] end
-	end
-
 	self.pos = self.pos:add( self.dir:smul( self.speed * dt ) )
 
 	if self.pos[1] < 0 and self.status==1 then
@@ -148,7 +143,12 @@ function Fish:update( dt )
 	if self.speed < self.min_speed then self.speed = self.min_speed end
 	if self.speed > self.max_speed then self.speed = self.max_speed end
 
-	if self.hook.attracted == self then		self.angular_dir = self.angular_dir * 0.9 + 0.1 * self.dir:angleDiff( self.pos:diff(self.hook.pos) )
+	if self.hook.attracted == self then
+		if self.hook.hooked == self then
+			self.angular_dir = self.angular_dir * 0.9 + 0.1 * self.dir:angleDiff( self.hook.hook_pos:diff(self.hook.pos))
+		else
+			self.angular_dir = self.angular_dir * 0.9 + 0.1 * self.dir:angleDiff( self.pos:diff(self.hook.pos) )
+		end
 	else
 		self.angular_dir = self.angular_dir * 0.9 * dt
 		self.angular_dir = self.angular_dir - math.log(1-math.random()) * self.steering * dt * randomSign()
@@ -162,6 +162,11 @@ function Fish:update( dt )
 		self.hook.hooked = self
 	end
 
+	if self.state==2 then
+		if self.pos[1]<0 and self.dir[1]<0 then self.dir[1]=-self.dir[1] end
+		if self.pos[1]>screensize[1] and self.dir[1]>0 then self.dir[1]=-self.dir[1] end
+	end
+
 	self:advance( dt )
 
 	if self.hook.attracted==self and self.hook.dir:mag() > self.hook.loosing_speed then
@@ -171,7 +176,8 @@ function Fish:update( dt )
 	end
 
 	if self.hook.hooked == self then
-		self.pos = self.hook.pos
+		self.pos = self.hook.hook_pos
+--~ 		self.dir = self.hook.hook_pos:diff(self.hook.pos):normalize()
 		if self.pos[2] < 0 then
 			self.school.list:removeCurrent()
 			self:disappear()
