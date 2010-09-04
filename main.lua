@@ -57,12 +57,13 @@ function love.load()
 	gameStatus = 0
 
 	bgImage = love.graphics.newImage( "fishbg.png" )
-	fishSchool = School()
+	hook = Hook()
+	fishSchool = School(hook)
 	seaWeedsBack = Weeds()
 	seaWeedsFront = Weeds()
 	bubbles = Bubbles()
 
-	hook = Hook()
+
 	keyDown = false
 	endTimer = 0
 end
@@ -136,8 +137,7 @@ function love.keypressed(key)
 	if gameStatus==0 then
 		gameStatus=1
 		fishSchool.list:discard()
-		fishSchool:generate(40)
-		fishSchool:connect(hook)
+		fishSchool:spawn(25)
 		return
 	end
 

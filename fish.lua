@@ -16,12 +16,16 @@
 --     You should have received a copy of the GNU General Public License
 --     along with Carassius auratus  If not, see <http://www.gnu.org/licenses/>.
 
-Fish = class(function(self)
+min_fish = 2
+max_fish = 22
+
+Fish = class(function(self, ftype)
 	if math.random(3)>1 then
 		self.type = 1
 	else
 		self.type = 2
 	end
+	self.type = ftype or self.type
 
 	if self.type==1 then
 		self.img = love.graphics.newImage("redfish1.png")
@@ -54,6 +58,17 @@ Fish = class(function(self)
 
 end)
 
+function Fish:setStatus( st )
+	self.status = st
+	if st==2 then
+		if self.dir[1]>=0 then
+			self.pos[1] = -40
+		else
+			self.pos[1] = screensize[1]+40
+		end
+	end
+end
+
 function Fish:connect( school, hook )
 	self.school = school
 	self.hook = hook
@@ -69,6 +84,11 @@ function Fish:draw()
 end
 
 function Fish:advance(dt)
+	if self.state==2 then
+		if self.pos[1]<0 and self.dir[1]<0 then self.dir[1]=-self.dir[1] end
+		if self.pos[1]>screensize[1] and self.dir[1]>0 then self.dir[1]=-self.dir[1] end
+	end
+
 	self.pos = self.pos:add( self.dir:smul( self.speed * dt ) )
 
 	if self.pos[1] < 0 and self.status==1 then
@@ -180,14 +200,55 @@ end
 
 ---------------------------------------------------------------------------------------
 
-School = class(function(self)
+School = class(function(self, hook)
 	self.list = List()
 	self.fish_count = {0,0}
+	self.period = {15*60, 24*60*math.pi/3}
+	self.hook = hook
+	self.timer = 0
 end)
 
-function School:generate( n )
+function School:generate( n, ftype )
 	for i=1,n do
-		self.list:pushBack( Fish() )
+		self.list:pushBack( Fish(ftype) )
+		self.list:getLast():connect(self, self.hook)
+		self.list:getLast():setStatus(2)
+	end
+end
+
+function School:spawn( n )
+	self:generate( n )
+	fish = self.list:getFirst()
+	while fish do
+		fish.pos[1] = math.random(screensize[1])
+		fish = self.list:getNext()
+	end
+end
+
+function School:kill( n, ftype )
+	local fish = self.list:getFirst()
+	if ftype then
+		if n>self.fish_count[ftype] then n=self.fish_count[ftype] end
+		for i=1,n do
+			while fish.type~=ftype or fish.status == 0 do
+				fish = self.list:getNext()
+				if not fish then return end
+			end
+
+			fish:setStatus(0)
+		end
+	else
+		if n>self.fish_count[1]+self.fish_count[2] then
+			n=self.fish_count[1]+self.fish_count[2]
+		end
+		for i=1,n do
+			while fish.status == 0 do
+				fish = self.list:getNext()
+				if not fish then return end
+			end
+
+			fish:setStatus(0)
+		end
 	end
 end
 
@@ -201,7 +262,7 @@ end
 
 function School:update(dt)
 	-- update the population
-
+	self:updatePopulations( dt )
 	-- update the fish
 	local fish = self.list:getFirst()
 	while fish do
@@ -210,10 +271,26 @@ function School:update(dt)
 	end
 end
 
-function School:connect(hook)
-	local fish = self.list:getFirst()
-	while fish do
-		fish:connect(self, hook)
-		fish = self.list:getNext()
+function School:updatePopulations( dt )
+	self.timer = self.timer + dt
+	if self.timer > self.period[1]*self.period[2] then self.timer = self.timer - self.period[1]*self.period[2] end
+	local desired = { math.floor(min_fish + (max_fish-min_fish)*(1+math.sin( self.timer * 2 * math.pi / self.period[1] )/2) + 0.5),
+					   math.floor(min_fish + (max_fish-min_fish)*(1+math.sin( self.timer * 2 * math.pi / self.period[2] )/2) + 0.5) }
+
+	for i=1,2 do
+		if self.fish_count[i]<desired[i] then
+			self:generate(desired[i]-self.fish_count[i],i)
+		elseif self.fish_count[i]>desired[i] then
+			self:kill(self.fish_count[i]-desired[i],i)
+		end
 	end
 end
+
+
+--~ function School:connect(hook)
+--~ 	local fish = self.list:getFirst()
+--~ 	while fish do
+--~ 		fish:connect(self, hook)
+--~ 		fish = self.list:getNext()
+--~ 	end
+--~ end
