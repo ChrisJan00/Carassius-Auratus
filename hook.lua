@@ -43,7 +43,7 @@ Hook = class(function(self)
 
 	self.attracted = nil
 	self.hooked = nil
-	self.loosing_speed = 100
+	self.loosing_speed = 120
 
 	self.gravity = 10
 	self.delay = 0
@@ -118,6 +118,8 @@ function Hook:throw()
 		self.pos[1] = self.top[1] - self.base_dir[1]/self.base_dir[2]*self.top[2]
 		self.pos[2] = 0
 		self.hook_pos = self.pos:add(Vector(0,-self.hook_len))
+
+		love.audio.play(sounds.plopin)
 	end
 end
 
@@ -126,6 +128,7 @@ function Hook:pull()
 		if self.thrown then
 			self.thrown = false
 			self.delay = 1.4
+			love.audio.play(sounds.plopout)
 		end
 		if self.hooked then
 			self.hooked:captured()

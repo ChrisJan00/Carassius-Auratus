@@ -76,10 +76,18 @@ function Fish:connect( school, hook )
 end
 
 function Fish:draw()
+	-- tension indicator
+	if self.hook.hooked==self then
+		local percent = (self.hook.loosing_speed - self.hook.dir:mag())/self.hook.loosing_speed
+		love.graphics.setColor(255*percent+128*(1-percent),255*percent,255)
+	end
 	if self.dir[1]>=0 then
 		love.graphics.draw( self.img, self.pos[1], self.pos[2], self.dir:angle(), 1, 1, self.img:getWidth()/2, self.img:getHeight()/2 )
 	else
 		love.graphics.draw( self.img, self.pos[1], self.pos[2], -self.dir:angleDiff({-1,0}), -1, 1, self.img:getWidth()/2, self.img:getHeight()/2)
+	end
+	if self.hook.hooked==self then
+		love.graphics.setColor(255,255,255)
 	end
 end
 
@@ -193,7 +201,7 @@ function Fish:attract()
 	if not self.hook.thrown then return end
 	if self.hook.pos[2]<0 then return end
 	if self.hook:hasFish() then return end
-	if self.speed > 150 then return end
+	if self.speed > 90 then return end
 	if self.hook.dir:mag() > 100 then return end
 	if self.pos:distance( self.hook.pos ) > 100 then return end
 	if math.abs( self.dir:angle(self.pos:diff( self.hook.pos ) ) ) > math.pi / 4 then return end
@@ -282,8 +290,8 @@ end
 function School:updatePopulations( dt )
 	self.timer = self.timer + dt
 	if self.timer > self.period[1]*self.period[2] then self.timer = self.timer - self.period[1]*self.period[2] end
-	local desired = { math.floor(min_fish + (max_fish-min_fish)*(1+math.sin( self.timer * 2 * math.pi / self.period[1] )/2) + 0.5),
-					   math.floor(min_fish + (max_fish-min_fish)*(1+math.sin( self.timer * 2 * math.pi / self.period[2] )/2) + 0.5) }
+	local desired = { math.floor(min_fish + (max_fish-min_fish)*(1-math.sin( self.timer * 2 * math.pi / self.period[1] )/2) + 0.5),
+					   math.floor(min_fish + (max_fish-min_fish)*(1-math.sin( self.timer * 2 * math.pi / self.period[2] )/2) + 0.5) }
 
 	for i=1,2 do
 		if self.fish_count[i]<desired[i] then

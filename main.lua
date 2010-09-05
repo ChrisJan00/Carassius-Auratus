@@ -42,9 +42,14 @@ function love.load()
 	math.randomseed(os.time())
 
 	-- Init graphics mode
-	screensize = { 800, 600 }
-	if not love.graphics.setMode( screensize[1], screensize[2], false, true, 0 ) then
-		quit()
+--~ 	screensize = { 800, 600 }
+	screensize = { 1024,768 }
+	fullscreen = false
+	if not love.graphics.setMode( screensize[1], screensize[2], fullscreen, true, 0 ) then
+		screensize = { 800, 600 }
+		if not love.graphics.setMode( screensize[1], screensize[2], fullscreen, true, 0 ) then
+			quit()
+		end
 	end
 
 	love.graphics.setBackgroundColor(0,0,0)
@@ -54,6 +59,14 @@ function love.load()
 	-- Text
 	love.graphics.setFont(32)
 
+	-- Sound
+	sounds = {
+		bubbles = love.audio.newSource("bubbles.ogg"),
+		plopin = love.audio.newSource("plopin.ogg"),
+		plopout = love.audio.newSource("plopout.ogg")
+	}
+
+	-- Game data
 	gameStatus = 0
 
 	bgImage = love.graphics.newImage( "fishbg.png" )
