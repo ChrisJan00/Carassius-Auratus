@@ -63,7 +63,10 @@ function love.load()
 	sounds = {
 		bubbles = love.audio.newSource("bubbles.ogg"),
 		plopin = love.audio.newSource("plopin.ogg"),
-		plopout = love.audio.newSource("plopout.ogg")
+		plopout = love.audio.newSource("plopout.ogg"),
+		scored = love.audio.newSource("point.ogg"),
+		bite = love.audio.newSource("bite.wav"),
+		escape = love.audio.newSource("lost.wav")
 	}
 
 	-- Game data
