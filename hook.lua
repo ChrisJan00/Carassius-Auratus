@@ -119,7 +119,7 @@ function Hook:throw()
 		self.pos[2] = 0
 		self.hook_pos = self.pos:add(Vector(0,-self.hook_len))
 
-		love.audio.play(sounds.plopin)
+		Sounds.play(sounds.plopin)
 	end
 end
 
@@ -128,7 +128,7 @@ function Hook:pull()
 		if self.thrown then
 			self.thrown = false
 			self.delay = 1.4
-			love.audio.play(sounds.plopout)
+			Sounds.play(sounds.plopout)
 		end
 		if self.hooked then
 			self.hooked:captured()

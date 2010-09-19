@@ -35,6 +35,7 @@ function love.load()
 	love.filesystem.require("hook.lua")
 	love.filesystem.require("weeds.lua")
 	love.filesystem.require("bubbles.lua")
+	love.filesystem.require("sounds.lua")
 
 	-- Initialization
 	start_time = love.timer.getTime()
@@ -59,21 +60,7 @@ function love.load()
 	-- Text
 	love.graphics.setFont(32)
 
-	-- Sound
-	sounds = {
-		bubbles = love.audio.newSource("bubbles.ogg"),
-		plopin = love.audio.newSource("plopin.ogg"),
-		plopout = love.audio.newSource("plopout.ogg"),
-		scored = love.audio.newSource("point.ogg"),
-		bite = love.audio.newSource("bite.wav"),
-		escape = love.audio.newSource("lost.wav")
-	}
-	sounds.bubbles:setVolume(0.5)
-	sounds.plopin:setVolume(0.5)
-	sounds.plopout:setVolume(0.5)
-	sounds.scored:setVolume(0.5)
-	sounds.bite:setVolume(0.5)
-	sounds.escape:setVolume(0.5)
+
 
 	-- Game data
 	gameStatus = 0

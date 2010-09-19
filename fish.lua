@@ -166,7 +166,7 @@ function Fish:update( dt )
 
 	if isAttracted and (not self.hook.hooked) and self.pos:distance( self.hook.hook_pos ) < 6 then
 		self.hook.hooked = self
-		love.audio.play(sounds.bite)
+		Sounds.play(sounds.bite)
 	end
 
 	if self.state==2 then
@@ -180,7 +180,7 @@ function Fish:update( dt )
 		self.hook.hooked = nil
 		self.hook.attracted = nil
 		self.dir = self.hook.pos:diff( self.pos )
-		love.audio.play(sounds.escape)
+		Sounds.play(sounds.escape)
 	end
 
 	if self.hook.hooked == self then
@@ -197,7 +197,7 @@ function Fish:captured()
 	self.school.list:remove(self)
 	self:disappear()
 	self.hook.fish_count = self.hook.fish_count + 1
-	love.audio.play(sounds.scored)
+	Sounds.play(sounds.scored)
 end
 
 function Fish:attract()
