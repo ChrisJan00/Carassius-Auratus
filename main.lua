@@ -45,7 +45,7 @@ function love.load()
 	-- Init graphics mode
 --~ 	screensize = { 800, 600 }
 	screensize = { 1024,768 }
-	fullscreen = false
+	fullscreen = true
 	if not love.graphics.setMode( screensize[1], screensize[2], fullscreen, true, 0 ) then
 		screensize = { 800, 600 }
 		if not love.graphics.setMode( screensize[1], screensize[2], fullscreen, true, 0 ) then
@@ -59,8 +59,6 @@ function love.load()
 
 	-- Text
 	love.graphics.setFont(32)
-
-
 
 	-- Game data
 	gameStatus = 0

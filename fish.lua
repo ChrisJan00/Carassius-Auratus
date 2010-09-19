@@ -51,6 +51,7 @@ Fish = class(function(self, ftype)
 	self.dir = Vector( math.random()-0.5, math.random()-0.5 ):normalize()
 	self.angular_dir = 0
 	self.speed = math.random( self.max_speed - self.min_speed ) + self.min_speed -- pixels/s
+
 	self.status = 1
 	-- status = 0 <-- exit screen
 	-- status = 1 <-- normal
@@ -76,11 +77,6 @@ function Fish:connect( school, hook )
 end
 
 function Fish:draw()
-	-- tension indicator
-	if self.hook.hooked==self then
-		local percent = (self.hook.loosing_speed - self.hook.pull_speed)/self.hook.loosing_speed
-		love.graphics.setColor(255*percent+128*(1-percent),255*percent,255)
-	end
 	if self.dir[1]>=0 then
 		love.graphics.draw( self.img, self.pos[1], self.pos[2], self.dir:angle(), 1, 1, self.img:getWidth()/2, self.img:getHeight()/2 )
 	else
@@ -150,6 +146,7 @@ function Fish:update( dt )
 	else
 		self.speed = self.speed - math.log(1-math.random()) * self.accel * dt * randomSign()
 	end
+
 	if self.speed < self.min_speed then self.speed = self.min_speed end
 	if self.speed > self.max_speed then self.speed = self.max_speed end
 
@@ -177,10 +174,7 @@ function Fish:update( dt )
 	self:advance( dt )
 
 	if isAttracted and self.hook.pull_speed > self.hook.loosing_speed then
-		self.hook.hooked = nil
-		self.hook.attracted = nil
-		self.dir = self.hook.pos:diff( self.pos )
-		Sounds.play(Sounds.escape)
+		self.hook:notifyEscaped()
 	end
 
 	if self.hook.hooked == self then
@@ -196,18 +190,17 @@ end
 function Fish:captured()
 	self.school.list:remove(self)
 	self:disappear()
-	self.hook.fish_count = self.hook.fish_count + 1
-	Sounds.play(Sounds.scored)
+	self.hook:notifyCatched()
 end
 
 function Fish:attract()
 	if self.hook.state ~= 2 then return end
 	if self.hook.pos[2]<0 then return end
 	if self.hook:hasFish() then return end
-	if self.speed > 90 then return end
-	if self.hook.pull_speed > 100 then return end
-	if self.pos:distance( self.hook.pos ) > 100 then return end
-	if math.abs( self.dir:angle(self.pos:diff( self.hook.pos ) ) ) > math.pi / 4 then return end
+	if self.speed > self.hook.attract_speed then return end
+	if self.hook.pull_speed > self.hook.escape_speed then return end
+	if self.pos:distance( self.hook.pos ) > self.hook.attract_distance then return end
+	if math.abs( self.dir:angle(self.pos:diff( self.hook.pos ) ) ) > self.hook.view_angle then return end
 	self.hook.attracted = self
 end
 

@@ -44,7 +44,7 @@ Hook = class(function(self)
 
 	self.attracted = nil
 	self.hooked = nil
-	self.loosing_speed = 250
+
 
 	self.gravity = 50
 	self.delay = 0
@@ -60,8 +60,37 @@ Hook = class(function(self)
 	self.state = 0
 
 	self.pulling = false
+	self.waiting_counter = 0
+	self.catch_in_row = 0
+	self.escape_in_row = 0
+	self.hooked_time = 0
+	self.hooked_limit = 1.4
+	self.min_hooked_limit = 0.4
+	self.max_hooked_limit = 2.0
+
+	self.patience_time = 50
+	self.min_patience_time = 10
+	self.max_patience_time = 360
+
+	self.attract_speed = 90
+	self.min_attract_speed = 70
+	self.max_attract_speed = 180
+	self.escape_speed = 100
+	self.attract_distance = 100
+	self.view_angle = math.pi/3
+
+	self.loosing_speed = 250
+	self.min_loosing_speed = 100
+	self.max_loosing_speed = 280
 
 end)
+
+-- difficulty:
+-- the more you wait, the easier they bite
+-- when they bite too easy, it becomes harder
+-- pulling:  the more they escape, the easier
+-- the less they escape, the harder.. count time since last catch...
+-- count
 
 function Hook:update(dt)
 	-- special conditions
@@ -75,7 +104,7 @@ function Hook:update(dt)
 	end
 
 	if self.state==2 then
-		-- extra slow
+		-- pulling dynamics
 		self.speed = self.speed * math.exp(- self.hard_damp * dt)
 		if self.pulling then
 			self.pull_dir = self.pos:diff( self.top ):normalize()
@@ -84,9 +113,28 @@ function Hook:update(dt)
 			self.pull_speed = self.pull_speed * math.exp( -2.8 * dt )
 		end
 
+		-- detect out of water
 		if self.pos[2]<0 then
 			self.state = 3
 			Sounds.play(Sounds.plopout)
+		end
+
+		-- track waiting time
+		if self.attracted or self.hooked then
+			self.waiting_counter = 0
+		else
+			self.waiting_counter = self.waiting_counter+dt
+		end
+		self.attract_speed = self.min_attract_speed + (self.max_attract_speed-self.min_attract_speed)*self.waiting_counter/self.patience_time
+
+		-- fish patience
+		if self.hooked and not self.pulling then
+			self.hooked_time = self.hooked_time+dt
+			if self.hooked_time>self.hooked_limit then
+				self:notifyEscaped()
+			end
+		else
+			self.hooked_time = 0
 		end
 	end
 
@@ -157,6 +205,9 @@ function Hook:press()
 		self.hooked = nil
 		self.attracted = nil
 
+		-- difficulty adjustment
+		self.waiting_counter = 0
+
 		-- force start throw at the limit of the screen
 		self.pos[1] = self.top[1] - self.base_dir[1]/self.base_dir[2]*self.top[2]
 		self.pos[2] = 0
@@ -212,4 +263,54 @@ end
 
 function Hook:attach( fish )
 	self.hooked = fish
+end
+
+function Hook:notifyEscaped()
+	if self.hooked then
+		self.hooked.dir = self.pos:diff( self.hooked.pos ):rotate( math.random()*math.pi - math.pi/2)
+		self.hooked.speed = self.loosing_speed
+		self.hooked = nil
+	end
+	self.attracted = nil
+
+	self.escape_in_row = self.escape_in_row + 1
+	self.loosing_speed = self.loosing_speed + 10
+	if self.loosing_speed > self.max_loosing_speed then
+		self.loosing_speed = self.max_loosing_speed
+	end
+
+	self.hooked_limit = self.hooked_limit + 0.2
+	if self.hooked_limit > self.max_hooked_limit then
+		self.hooked_limit = self.max_hooked_limit
+	end
+
+	self.patience_time = self.patience_time - 10
+	if self.patience_time < self.min_patience_time then
+		self.patience_time = self.min_patience_time
+	end
+
+	self.catch_in_row = 0
+	Sounds.play(Sounds.escape)
+end
+
+function Hook:notifyCatched()
+	self.fish_count = self.fish_count + 1
+	self.catch_in_row = self.catch_in_row + 1
+	self.loosing_speed = self.loosing_speed - 10
+	if self.loosing_speed < self.min_loosing_speed then
+		self.loosing_speed = self.min_loosing_speed
+	end
+
+	self.hooked_limit = self.hooked_limit - 0.2
+	if self.hooked_limit < self.min_hooked_limit then
+		self.hooked_limit = self.min_hooked_limit
+	end
+
+	self.patience_time = self.patience_time + 10
+	if self.patience_time > self.max_patience_time then
+		self.patience_time = self.max_patience_time
+	end
+
+	self.escape_in_row = 0
+	Sounds.play(Sounds.scored)
 end
