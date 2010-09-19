@@ -71,7 +71,7 @@ function Bubbles:update(dt)
 		self.x, self.y = math.random(screensize[1]),math.random(screensize[2]*2/3)+screensize[2]*1/3
 		self.active = math.random()*2+1
 		self.timer = 0
-		Sounds.play(sounds.bubbles)
+		Sounds.play(Sounds.bubbles)
 	end
 	if self.active>0 then
 		self.active = self.active - dt

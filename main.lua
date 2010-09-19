@@ -45,7 +45,7 @@ function love.load()
 	-- Init graphics mode
 --~ 	screensize = { 800, 600 }
 	screensize = { 1024,768 }
-	fullscreen = true
+	fullscreen = false
 	if not love.graphics.setMode( screensize[1], screensize[2], fullscreen, true, 0 ) then
 		screensize = { 800, 600 }
 		if not love.graphics.setMode( screensize[1], screensize[2], fullscreen, true, 0 ) then
@@ -85,7 +85,7 @@ function love.update(dt)
 		seaWeedsFront:update( dt )
 		bubbles:update( dt )
 
-		if keyDown then hook:throw() else hook:pull() end
+		if keyDown then hook:press() else hook:release() end
 
 		hook:update(dt)
 	end
@@ -145,6 +145,10 @@ function love.keypressed(key)
 			quit()
 		end
 		return
+	end
+
+	if key=="m" then
+		Sounds.flip()
 	end
 
 	if gameStatus==0 then

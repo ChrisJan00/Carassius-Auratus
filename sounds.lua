@@ -41,6 +41,14 @@ function Sounds.unmute()
 	Sounds.on = true
 end
 
+function Sounds.flip()
+	if Sounds.on then
+		Sounds.mute()
+	else
+		Sounds.unmute()
+	end
+end
+
 function Sounds.play(snd)
 	if Sounds.on then
 		love.audio.play(snd)

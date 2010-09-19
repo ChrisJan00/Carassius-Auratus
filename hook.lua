@@ -18,6 +18,7 @@
 
 Hook = class(function(self)
 	self.thrown = false
+	self.falling = true
 	self.pos = Vector(0,0)
 	self.hook_pos = Vector(0,0)
 	self.top = Vector(screensize[1]*3/4, -screensize[2]/2)
@@ -27,10 +28,12 @@ Hook = class(function(self)
 
 	self.dir = Vector(0,0)
 	self.speed = 0
-	self.damp = 1.2
+	self.soft_damp = 1.2
+	self.hard_damp = 2.6
 
 	self.pull_dir = Vector( 0,0 )
 	self.pull_speed = 0
+	self.max_pull_speed = 300
 
 	self.base_dir = Vector(0,0)
 	self.base_speed = 0
@@ -39,23 +42,63 @@ Hook = class(function(self)
 
 	self.wind_dir = Vector(1,0)
 	self.wind_speed = 0
-	self.wind_max_speed = 50
+	self.wind_max_speed = 20
 
 	self.attracted = nil
 	self.hooked = nil
-	self.loosing_speed = 120
+	self.loosing_speed = 250
 
-	self.gravity = 10
+	self.gravity = 50
 	self.delay = 0
 
 	self.fish_count = 0
 
+	-- states:
+	--  waiting, outside of the screen: until the player presses
+	--  falling (thrown):  as long as the player presses
+	--  pulling (without fish):  waits down, as the user presses, it pulls
+	--  pulling (with fish):  same, fish can escape
+	--  out: reaches out of screen
+	self.state = 0
+
+	self.pulling = false
+
 end)
 
 function Hook:update(dt)
-	if self.delay > 0 then
-		self.delay = self.delay - dt
+	-- special conditions
+	if self.state==0 then
+		if self.delay > 0 then
+			self.delay = self.delay - dt
+		end
 	end
+
+	if self.state==1 then
+	end
+
+	if self.state==2 then
+		-- extra slow
+		self.speed = self.speed * math.exp(- self.hard_damp * dt)
+		if self.pulling then
+			self.pull_dir = self.pos:diff( self.top ):normalize()
+			self.pull_speed = self.pull_speed + (self.max_pull_speed-self.pull_speed) * (1-math.exp( -2.8 * dt ))
+		else
+			self.pull_speed = self.pull_speed * math.exp( -2.8 * dt )
+		end
+
+		if self.pos[2]<0 then
+			self.state = 3
+			Sounds.play(Sounds.plopout)
+
+			-- fish captured?
+		end
+	end
+
+	if self.state==3 then
+	end
+
+	-- normal update
+
 
 	self.dir = Vector(0,0):add(
 		self.base_dir:smul(self.speed),
@@ -70,10 +113,7 @@ function Hook:update(dt)
 
 	-- friction
 	if self.pos[2]>0 then
-		self.speed = self.speed * math.exp(- self.damp * dt)
-
-		-- loose pull
-		self.pull_speed = self.pull_speed * math.exp( -2.8 * dt )
+		self.speed = self.speed * math.exp(- self.soft_damp * dt)
 
 		-- avoid borders
 		self.center_dir = self.pos:diff( Vector(screensize[1]/2, screensize[2]/2 ) )
@@ -98,7 +138,7 @@ end
 
 
 function Hook:draw()
-	if not self.thrown then return end
+	if self.status==0 then return end
 
 	love.graphics.setColor(0,0,0)
 	love.graphics.setLine(2)
@@ -106,40 +146,68 @@ function Hook:draw()
 	love.graphics.draw(self.picture, self.pos[1], self.pos[2], (self.pos:diff(self.hook_pos):angle()-math.pi/2) , 1, 1, self.picture:getWidth()/2, 0 )
 
 	love.graphics.setColor(255,255,255)
+
 end
 
-function Hook:throw()
-	if (not self.thrown) and self.delay <= 0 then
+function Hook:press()
+	self.pulling = true
+
+	if self.state==0 and self.delay<=0 then
+		-- begin throw
 		self.base_dir = Vector( math.random()*5-4, 5 ):normalize()
-		self.speed = 300 + math.random()*400
-		self.thrown = true
+		self.speed = 700
+		self.state = 1
+		self.pull_speed = 0
+		self.hooked = nil
+		self.attracted = nil
 
 		-- force start throw at the limit of the screen
 		self.pos[1] = self.top[1] - self.base_dir[1]/self.base_dir[2]*self.top[2]
 		self.pos[2] = 0
 		self.hook_pos = self.pos:add(Vector(0,-self.hook_len))
 
-		Sounds.play(sounds.plopin)
-	end
-end
-
-function Hook:pull()
-	if self.pos[2] < 0 then
-		if self.thrown then
-			self.thrown = false
-			self.delay = 1.4
-			Sounds.play(sounds.plopout)
-		end
-		if self.hooked then
-			self.hooked:captured()
-		end
-		self.hooked = nil
-		self.attracted = nil
-		self.pos[2] = -screensize[2]
+		Sounds.play(Sounds.plopin)
 		return
 	end
-	self.pull_dir = self.pos:diff( self.top )
-	self.pull_speed = self.pull_speed + 7
+
+	if self.state==1 then
+		return
+	end
+
+	if self.state==2 then
+		return
+	end
+
+	if self.state==3 then
+		return
+	end
+
+end
+
+function Hook:release()
+	-- state 0 -> nothing
+	self.pulling = false
+
+	if self.state==0 then
+		return
+	end
+
+	if self.state==1 then
+		self.state=2
+		return
+	end
+
+	if self.state==2 then
+		return
+	end
+
+	if self.state==3 then
+		self.state=0
+		self.delay=1.4
+		return
+	end
+
+
 end
 
 function Hook:hasFish()

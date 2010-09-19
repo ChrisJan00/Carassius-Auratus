@@ -78,7 +78,7 @@ end
 function Fish:draw()
 	-- tension indicator
 	if self.hook.hooked==self then
-		local percent = (self.hook.loosing_speed - self.hook.dir:mag())/self.hook.loosing_speed
+		local percent = (self.hook.loosing_speed - self.hook.pull_speed)/self.hook.loosing_speed
 		love.graphics.setColor(255*percent+128*(1-percent),255*percent,255)
 	end
 	if self.dir[1]>=0 then
@@ -166,7 +166,7 @@ function Fish:update( dt )
 
 	if isAttracted and (not self.hook.hooked) and self.pos:distance( self.hook.hook_pos ) < 6 then
 		self.hook.hooked = self
-		Sounds.play(sounds.bite)
+		Sounds.play(Sounds.bite)
 	end
 
 	if self.state==2 then
@@ -176,11 +176,11 @@ function Fish:update( dt )
 
 	self:advance( dt )
 
-	if isAttracted and self.hook.dir:mag() > self.hook.loosing_speed then
+	if isAttracted and self.hook.pull_speed > self.hook.loosing_speed then
 		self.hook.hooked = nil
 		self.hook.attracted = nil
 		self.dir = self.hook.pos:diff( self.pos )
-		Sounds.play(sounds.escape)
+		Sounds.play(Sounds.escape)
 	end
 
 	if self.hook.hooked == self then
@@ -197,15 +197,15 @@ function Fish:captured()
 	self.school.list:remove(self)
 	self:disappear()
 	self.hook.fish_count = self.hook.fish_count + 1
-	Sounds.play(sounds.scored)
+	Sounds.play(Sounds.scored)
 end
 
 function Fish:attract()
-	if not self.hook.thrown then return end
+	if self.hook.state ~= 2 then return end
 	if self.hook.pos[2]<0 then return end
 	if self.hook:hasFish() then return end
 	if self.speed > 90 then return end
-	if self.hook.dir:mag() > 100 then return end
+	if self.hook.pull_speed > 100 then return end
 	if self.pos:distance( self.hook.pos ) > 100 then return end
 	if math.abs( self.dir:angle(self.pos:diff( self.hook.pos ) ) ) > math.pi / 4 then return end
 	self.hook.attracted = self
