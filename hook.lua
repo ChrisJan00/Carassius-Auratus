@@ -17,8 +17,6 @@
 --     along with Carassius auratus  If not, see <http://www.gnu.org/licenses/>.
 
 Hook = class(function(self)
-	self.thrown = false
-	self.falling = true
 	self.pos = Vector(0,0)
 	self.hook_pos = Vector(0,0)
 	self.top = Vector(screensize[1]*3/4, -screensize[2]/2)
@@ -89,8 +87,6 @@ function Hook:update(dt)
 		if self.pos[2]<0 then
 			self.state = 3
 			Sounds.play(Sounds.plopout)
-
-			-- fish captured?
 		end
 	end
 
