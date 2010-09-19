@@ -44,7 +44,7 @@ function love.load()
 	-- Init graphics mode
 --~ 	screensize = { 800, 600 }
 	screensize = { 1024,768 }
-	fullscreen = false
+	fullscreen = true
 	if not love.graphics.setMode( screensize[1], screensize[2], fullscreen, true, 0 ) then
 		screensize = { 800, 600 }
 		if not love.graphics.setMode( screensize[1], screensize[2], fullscreen, true, 0 ) then
@@ -68,6 +68,12 @@ function love.load()
 		bite = love.audio.newSource("bite.wav"),
 		escape = love.audio.newSource("lost.wav")
 	}
+	sounds.bubbles:setVolume(0.5)
+	sounds.plopin:setVolume(0.5)
+	sounds.plopout:setVolume(0.5)
+	sounds.scored:setVolume(0.5)
+	sounds.bite:setVolume(0.5)
+	sounds.escape:setVolume(0.5)
 
 	-- Game data
 	gameStatus = 0
@@ -105,7 +111,7 @@ function love.update(dt)
 	end
 
 	if fishSchool.list:count() == 0 and gameStatus==1 then
-		gameStatus = 2
+--~ 		gameStatus = 2
 		endTimer = 4.5
 	end
 end
@@ -115,14 +121,18 @@ function love.draw()
 	love.graphics.draw(bgImage, 0, 0)
 
 	if gameStatus==0 then
+		love.graphics.setFont(32)
 		love.graphics.print("Carassius auratus", 70, 125)
-		love.graphics.print("A fishing simulation", 70, 175)
-		love.graphics.print("Press a key", 70, 225)
+		love.graphics.print("A fishing amusement", 70, 175)
+		love.graphics.print("Press any key", 70, 225)
 		love.graphics.print("by Christiaan Janssen", 400, 550)
+		love.graphics.setFont(12)
+		love.graphics.print("(m is for mute)", 70, 250)
+		love.graphics.setFont(32)
 		return
 	end
 
-	if gameStatus==2 then
+	if fishSchool.list:count() == 0 and gameStatus==1 then
 		love.graphics.print("The pond is empty.  Relax", 70, 150)
 	end
 
@@ -153,7 +163,9 @@ function love.keypressed(key)
 	if gameStatus==0 then
 		gameStatus=1
 		fishSchool.list:discard()
+		fishSchool = School(hook)
 		fishSchool:spawn(25)
+		fishSchool.timer=0
 		return
 	end
 
