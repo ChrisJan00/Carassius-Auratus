@@ -73,6 +73,8 @@ function love.load()
 
 	keyDown = false
 	endTimer = 0
+
+	love.audio.play(MainSeq)
 end
 
 function love.update(dt)
@@ -96,7 +98,6 @@ function love.update(dt)
 	end
 
 	if fishSchool.list:count() == 0 and gameStatus==1 then
---~ 		gameStatus = 2
 		endTimer = 4.5
 	end
 end
@@ -123,7 +124,6 @@ function love.draw()
 
 	if gameStatus==1 then
 		love.graphics.print(hook.fish_count, 30, 30)
---~ 		love.graphics.print(fishSchool.fish_count[1].." "..fishSchool.fish_count[2],30,30)
 	end
 
 	seaWeedsBack:draw()
@@ -147,6 +147,7 @@ function love.keypressed(key)
 
 	if key=="m" then
 		Sounds.flip()
+		return
 	end
 
 	if gameStatus==0 then

@@ -17,13 +17,16 @@
 --     along with Carassius auratus  If not, see <http://www.gnu.org/licenses/>.
 
 Sounds = {
-	bubbles = love.audio.newSource("bubbles.ogg"),
-	plopin = love.audio.newSource("plopin.ogg"),
-	plopout = love.audio.newSource("plopout.ogg"),
-	scored = love.audio.newSource("point.ogg"),
-	bite = love.audio.newSource("bite.wav"),
-	escape = love.audio.newSource("lost.wav")
+	bubbles = love.audio.newSource("bubbles.ogg","static"),
+	plopin = love.audio.newSource("plopin.ogg","static"),
+	plopout = love.audio.newSource("plopout.ogg","static"),
+	scored = love.audio.newSource("point.ogg","static"),
+	bite = love.audio.newSource("bite.wav","static"),
+	escape = love.audio.newSource("lost.wav","static")
 }
+
+MainSeq = love.audio.newSource("arpeggio.ogg","static")
+
 Sounds.on = true
 
 Sounds.bubbles:setVolume(0.5)
@@ -32,12 +35,15 @@ Sounds.plopout:setVolume(0.5)
 Sounds.scored:setVolume(0.5)
 Sounds.bite:setVolume(0.5)
 Sounds.escape:setVolume(0.5)
+MainSeq:setLooping(true)
 
 function Sounds.mute()
+	love.audio.pause()
 	Sounds.on = false
 end
 
 function Sounds.unmute()
+	love.audio.resume()
 	Sounds.on = true
 end
 
